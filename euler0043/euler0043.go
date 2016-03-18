@@ -16,18 +16,14 @@ the following:
 
 Find the sum of all 0 to 9 pandigital numbers with this property.
 */
-
-// FIXME This problem is not yet solved.
-
-package main
+package euler0043
 
 import (
-	"fmt"
 	"sort"
 	"strconv"
 )
 
-func intSliceToInt(ints []int) int {
+func IntSliceToInt(ints []int) int {
 	s := ""
 
 	for _, v := range ints {
@@ -42,13 +38,13 @@ func intSliceToInt(ints []int) int {
 	return n
 }
 
-type intPermuter struct {
+type IntPermuter struct {
 	Seq []int
 }
 
 // First sets p.Seq equal to the first lexicographic permutation of p.Seq and
 // returns p.Seq.
-func (p *intPermuter) First() []int {
+func (p *IntPermuter) First() []int {
 	sort.IntSlice(p.Seq).Sort()
 	return p.Seq
 }
@@ -56,7 +52,7 @@ func (p *intPermuter) First() []int {
 // Next sets p.Seq equal to the next lexicographic permutation of p.Seq and
 // returns p.Seq.
 // http://en.wikipedia.org/wiki/Permutation#Generation_in_lexicographic_order
-func (p *intPermuter) Next() ([]int, bool) {
+func (p *IntPermuter) Next() ([]int, bool) {
 	// Find the largest index m such that a[m] < a[m + 1]. If no such index
 	// exists, the permutation is the last permutation.
 	var m = -1
@@ -98,68 +94,27 @@ func reverseOrder(s []int) {
 	}
 }
 
-func excludeMultiples(n int, sieve []bool) {
-	for i := n + n; i < len(sieve); i += n {
-		sieve[i] = true
-	}
+func IsDivisible(values []int, target int) bool {
+	a := 100 * values[0]
+	b := 10 * values[1]
+	c := values[2]
+
+	return (a+b+c)%target == 0
 }
 
-func primeChecker(sieve []bool) func(int) bool {
-	return func(n int) bool {
-		return !sieve[n]
-	}
-}
+var targets = []int{2, 3, 5, 7, 11, 13, 17}
 
-// sieve is zeroed, false indicates the value has not been excluded from
-// the sieve and therefore may be prime.  true indicates a known composite
-// number.
-var limit = 1000
-var sieve = make([]bool, limit)
-
-func main() {
-	// 0 and 1 are composite
-	sieve[0] = true
-	sieve[1] = true
-
-	for i := 2; i < limit; {
-		excludeMultiples(i, sieve)
-
-		// find the next prime, which will always be the next false value in
-		// the sieve
-		i++
-		for i < limit && sieve[i] {
-			i++
+func IsSubstringDivisible(input []int) bool {
+	isSolution := true
+	t := 0
+	for i := 4; i <= len(input); i += 1 {
+		target := targets[t]
+		if !IsDivisible(input[i-3:i], target) {
+			isSolution = false
+			break
 		}
+		t++
 	}
 
-	isPrime := primeChecker(sieve)
-
-	sum := 0
-	s := &intPermuter{Seq: []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}}
-
-	s.First()
-
-	ok := true
-	for perm := s.First(); ok; perm, ok = s.Next() {
-		if perm[0] == 0 {
-			continue
-		}
-		isSolution := true
-		for i := 1; i < 8; i++ {
-			n, err := strconv.Atoi(string('0'+perm[i]) + string('0'+perm[i+1]) + string('0'+perm[i+2]))
-			if err != nil {
-				panic(err)
-			}
-
-			if !isPrime(n) {
-				isSolution = false
-			}
-		}
-
-		if isSolution {
-			sum += intSliceToInt(perm)
-		}
-	}
-
-	fmt.Println(sum)
+	return isSolution
 }
